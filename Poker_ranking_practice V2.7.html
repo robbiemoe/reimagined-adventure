@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Hand Ranking Flashcards</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Favicon (optional) -->
+    <link rel="icon" href="https://www.microsoft.com/favicon.ico" type="image/x-icon">
+
+    <meta name="description" content="A mobile-friendly, interactive game to practice poker hand rankings, compatible with OneDrive and Edge browser.">
+
+    <!-- Optional: Meta tags for PWA (Progressive Web App) capabilities -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a472a">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a472a, #2d6a4f);
+            min-height: 100vh;
+            display: flex; /* Use flexbox for body to center content vertically */
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            padding: 1rem; /* Add some padding around the main container */
+        }
+        
+        /* Main container sizing for better mobile display */
+        .main-container {
+            width: 100%;
+            max-width: 960px; /* Adjusted max-width */
+        }
+
+        /* Card base sizing - will be overridden by media queries for larger screens */
+        .card {
+            width: 60px; /* Smaller base card width for very small mobile screens */
+            height: 85px; /* Maintain aspect ratio */
+            perspective: 1000px;
+            display: inline-block;
+            margin: 0 2px; /* Reduced margin */
+            flex-shrink: 0; 
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 6px; /* Slightly smaller border radius */
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column; /* Align content vertically */
+            align-items: center;
+            justify-content: space-between; /* Space out value and suit */
+            padding: 5px; /* Add some padding */
+            box-sizing: border-box;
+        }
+        
+        .card-front {
+            background-color: #f0f0f0;
+            color: black;
+            transform: rotateY(180deg);
+            font-size: 0.8em;
+            padding-top: 8px; /* More padding for value at top */
+            padding-bottom: 8px; /* More padding for suit at bottom */
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            background-image: url("data:image/svg+xml,%3Csvg width='70' height='100' viewBox='0 0 70 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M35 50C35 41.716 41.716 35 50 35C58.284 35 65 41.716 65 50C65 58.284 58.284 65 50 65C41.716 65 35 58.284 35 50Z' fill='%23ffffff20'/%3E%3Cpath d='M5 50C5 41.716 11.716 35 20 35C28.284 35 35 41.716 35 50C35 58.284 28.284 65 20 65C11.716 65 5 58.284 5 50Z' fill='%23ffffff20'/%3E%3Cpath d='M20 5C28.284 5 35 11.716 35 20C35 28.284 28.284 35 20 35C11.716 35 5 28.284 5 20C5 11.716 11.716 5 20 5Z' fill='%23ffffff20'/%3E%3Cpath d='M50 5C58.284 5 65 11.716 65 20C65 28.284 58.284 35 50 35C41.716 35 35 28.284 35 20C35 11.716 41.716 5 50 5Z' fill='%23ffffff20'/%3E%3Cpath d='M20 65C28.284 65 35 71.716 35 80C35 88.284 28.284 95 20 95C11.716 95 5 88.284 5 80C5 71.716 11.716 65 20 65Z' fill='%23ffffff20'/%3E%3Cpath d='M50 65C58.284 65 65 71.716 65 80C65 88.284 58.284 95 50 95C41.716 95 35 88.284 35 80C35 71.716 41.716 65 50 65Z' fill='%23ffffff20'/%3E%3C/svg%3E");
+        }
+        
+        .flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .highlight {
+            box-shadow: 0 0 15px 5px #ffd700;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 1); }
+            100% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            transition: width 0.5s ease;
+        }
+        
+        .timer {
+            font-family: 'Poppins', monospace;
+            font-weight: 600;
+        }
+        
+        .card-suit {
+            font-size: 24px; /* Adjusted for smaller cards */
+            line-height: 1;
+        }
+        
+        .card-value {
+            font-size: 28px; /* Adjusted for smaller cards */
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .red {
+            color: #dc2626;
+        }
+        
+        .black {
+            color: #000000;
+        }
+        
+        .time-warning {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Responsive adjustments for various screen sizes */
+        @media (min-width: 480px) { /* Small phones landscape / larger phones portrait */
+            .card {
+                width: 70px;
+                height: 100px;
+            }
+            .card-suit {
+                font-size: 28px;
+            }
+            .card-value {
+                font-size: 32px;
+            }
+        }
+
+        @media (min-width: 640px) { /* sm breakpoint (tablets portrait, larger phones landscape) */
+            .card {
+                width: 75px;
+                height: 110px;
+            }
+            .card-suit {
+                font-size: 30px;
+            }
+            .card-value {
+                font-size: 34px;
+            }
+            .main-container {
+                padding: 1.5rem;
+            }
+            .flex-col.md\:flex-row { /* Ensure header elements stack on small screens */
+                flex-direction: column;
+            }
+            .md\:space-y-0 {
+                margin-top: 1rem; /* Add space between stacked header elements */
+            }
+            .md\:space-x-4 > *:not([hidden]) ~ *:not([hidden]) {
+                margin-left: 0; /* Reset horizontal margin for stacked items */
+            }
+        }
+
+        @media (min-width: 768px) { /* md breakpoint (tablets landscape, small laptops) */
+            .card {
+                width: 80px;
+                height: 120px;
+            }
+            .card-suit {
+                font-size: 32px;
+            }
+            .card-value {
+                font-size: 36px;
+            }
+            .flex-col.md\:flex-row { /* Revert header elements to row on larger screens */
+                flex-direction: row;
+            }
+            .md\:space-y-0 {
+                margin-top: 0; /* Remove vertical space when in row */
+            }
+            .md\:space-x-4 > *:not([hidden]) ~ *:not([hidden]) {
+                margin-left: 1rem; /* Re-apply horizontal margin for row items */
+            }
+        }
+        
+        /* Combined Community Cards Display */
+        .community-cards-display {
+            display: flex;
+            flex-wrap: wrap; /* Allow cards to wrap if screen is too narrow */
+            justify-content: center;
+            gap: 1rem; /* Gap between Flop, Turn, River sections */
+            padding: 10px 0;
+        }
+
+        .community-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem; /* Gap between label and cards */
+            padding: 0.5rem;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1); /* Subtle background for sections */
+        }
+
+        .community-section-cards {
+            display: flex;
+            justify-content: center;
+            gap: 4px; /* Gap between cards within a section */
+            flex-wrap: nowrap; /* Keep cards in a single row within their section */
+        }
+
+        /* Player hand containers */
+        .player-hand-container {
+            display: flex;
+            justify-content: center;
+            gap: 4px; /* Smaller gap for player cards */
+            flex-wrap: nowrap; /* Prevent player cards from wrapping, they should stay in a row */
+        }
+
+        /* Ensure card elements within containers respond to flexbox */
+        .player-hand-container > .card,
+        .community-section-cards > .card { /* Target cards within the new section structure */
+            flex-shrink: 0; /* Prevent cards from shrinking */
+        }
+    </style>
+</head>
+<body class="p-4">
+    <!-- Registration Modal -->
+    <div id="registration-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Player Registration</h2>
+            <form id="registration-form" class="space-y-4">
+                <div>
+                    <label for="player-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="player-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="player-id" class="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                    <input type="text" id="player-id" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="difficulty-level" class="block text-sm font-medium text-gray-700 mb-1">Difficulty Level</label>
+                    <select id="difficulty-level" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="15">Professional (15 seconds)</option>
+                        <option value="10">Excellent (10 seconds)</option>
+                        <option value="20">Good (20 seconds)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    Start Game
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-container mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Poker Hand Ranking</h1>
+                    <div class="mt-1 text-gray-600" id="player-info">Not registered</div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+                    <div class="text-lg font-semibold text-gray-700">Score: <span id="score">0</span>/<span id="total">0</span></div>
+                    <div class="timer px-4 py-2 bg-gray-100 rounded-lg text-xl font-mono">00:00</div>
+                    <div id="level-indicator" class="level-badge bg-blue-100 text-blue-800">Good</div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="bg-green-100 p-4 rounded-lg mb-6">
+                <h2 class="text-xl font-semibold text-green-800 mb-2 text-center">Community Cards</h2>
+                <div class="community-cards-display" id="community-cards-all">
+                    <!-- Flop Section -->
+                    <div class="community-section">
+                        <div class="text-sm font-medium text-green-700">FLOP</div>
+                        <div class="community-section-cards">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop1"></div>
+                                </div>
+                            </div>
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop2"></div>
+                                </div>
+                            </div>
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Turn Section -->
+                    <div class="community-section">
+                        <div class="text-sm font-medium text-green-700">TURN</div>
+                        <div class="community-section-cards">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="turn"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- River Section -->
+                    <div class="community-section">
+                        <div class="text-sm font-medium text-green-700">RIVER</div>
+                        <div class="community-section-cards">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="river"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 1</h3>
+                    <div class="player-hand-container" id="player1-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player1-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player1-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(0)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player1-hand"></div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 2</h3>
+                    <div class="player-hand-container" id="player2-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player2-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player2-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(1)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player2-hand"></div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 3</h3>
+                    <div class="player-hand-container" id="player3-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player3-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player3-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(2)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player3-hand"></div>
+                </div>
+            </div>
+            
+            <div id="result" class="hidden p-4 rounded-lg mb-6 text-center"></div>
+            
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="next-btn" class="btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg hidden w-full sm:w-auto">
+                    Next Hand
+                </button>
+                <button id="restart-btn" class="btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg w-full sm:w-auto">
+                    Register & Start
+                </button>
+            </div>
+            
+            <!-- Game Stats Section -->
+            <div id="game-stats" class="mt-8 p-4 bg-gray-50 rounded-lg hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Game Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Accuracy</div>
+                        <div class="text-2xl font-bold" id="accuracy-stat">0%</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Average Time</div>
+                        <div class="text-2xl font-bold" id="avg-time-stat">0.0s</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Performance Rating</div>
+                        <div class="text-2xl font-bold" id="rating-stat">-</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h4 class="font-medium text-gray-700 mb-2">Session History</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hand</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Result</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Time (s)</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Winning Hand</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- History rows will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Card definitions
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const suitColors = {
+            '♠': 'black',
+            '♥': 'red',
+            '♦': 'red',
+            '♣': 'black'
+        };
+
+        const cardRankMap = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+        
+        // Game state
+        let deck = [];
+        let communityCards = [];
+        let playerHands = [[], [], []];
+        let winningPlayerIndices = []; // Can now hold multiple indices for ties
+        let score = 0;
+        let totalQuestions = 0;
+        let timer = null;
+        let countdownTimer = null;
+        let startTime = 0;
+        let handStartTime = 0;
+        let timeLimit = 20;
+        let playerName = "";
+        let playerId = "";
+        let gameActive = false;
+        let handTimes = [];
+        let handResults = [];
+        let winningHandTypes = []; // Stores the actual winning hand type for the session history
+        let timeoutId = null;
+        
+        // Initialize the game
+        function initGame() {
+            document.getElementById('restart-btn').addEventListener('click', showRegistrationModal);
+            document.getElementById('next-btn').addEventListener('click', nextHand);
+            document.getElementById('registration-form').addEventListener('submit', handleRegistration);
+            
+            updateLevelIndicator(20);
+            showRegistrationModal();
+        }
+        
+        function showRegistrationModal() {
+            document.getElementById('registration-modal').classList.remove('hidden');
+            if (timer) clearInterval(timer);
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (timeoutId) clearTimeout(timeoutId);
+            gameActive = false;
+        }
+        
+        function handleRegistration(e) {
+            e.preventDefault();
+            
+            playerName = document.getElementById('player-name').value.trim();
+            playerId = document.getElementById('player-id').value.trim();
+            timeLimit = parseInt(document.getElementById('difficulty-level').value);
+            
+            if (playerName && playerId) {
+                document.getElementById('registration-modal').classList.add('hidden');
+                document.getElementById('player-info').textContent = `${playerName} (ID: ${playerId})`;
+                updateLevelIndicator(timeLimit);
+                startGame();
+            }
+        }
+        
+        function updateLevelIndicator(seconds) {
+            const levelIndicator = document.getElementById('level-indicator');
+            let levelText = "";
+            let bgColor = "";
+            let textColor = "";
+            
+            switch(seconds) {
+                case 10:
+                    levelText = "Excellent";
+                    bgColor = "bg-yellow-100";
+                    textColor = "text-yellow-800";
+                    break;
+                case 15:
+                    levelText = "Professional";
+                    bgColor = "bg-purple-100";
+                    textColor = "text-purple-800";
+                    break;
+                default:
+                    levelText = "Good";
+                    bgColor = "bg-blue-100";
+                    textColor = "text-blue-800";
+            }
+            
+            levelIndicator.textContent = levelText;
+            levelIndicator.className = `level-badge ${bgColor} ${textColor}`;
+        }
+        
+        function startGame() {
+            score = 0;
+            totalQuestions = 0;
+            handTimes = [];
+            handResults = [];
+            winningHandTypes = [];
+            gameActive = true;
+            
+            updateScore();
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.querySelector('.progress').style.width = '0%';
+            document.getElementById('game-stats').classList.add('hidden');
+            const oldInstruction = document.querySelector('.manual-data-instruction');
+            if (oldInstruction) oldInstruction.remove();
+
+            document.getElementById('history-table-body').innerHTML = '';
+            
+            startTimer();
+            dealNewHand();
+        }
+        
+        function dealNewHand() {
+            resetDeck();
+            communityCards = dealCards(5);
+            playerHands = [dealCards(2), dealCards(2), dealCards(2)];
+            
+            // Display community cards
+            displayCard('flop1', communityCards[0]);
+            displayCard('flop2', communityCards[1]);
+            displayCard('flop3', communityCards[2]);
+            displayCard('turn', communityCards[3]);
+            displayCard('river', communityCards[4]);
+            
+            // Display player cards
+            displayCard('player1-card1', playerHands[0][0]);
+            displayCard('player1-card2', playerHands[0][1]);
+            displayCard('player2-card1', playerHands[1][0]);
+            displayCard('player2-card2', playerHands[1][1]);
+            displayCard('player3-card1', playerHands[2][0]);
+            displayCard('player3-card2', playerHands[2][1]);
+            
+            // Evaluate hands and determine winner(s)
+            const handRankings = playerHands.map((hand, index) => {
+                const handRank = evaluateTexasHoldemHand(hand, communityCards);
+                return { index, handRank };
+            });
+            
+            // Sort to find the best hand(s)
+            handRankings.sort((a, b) => {
+                if (b.handRank.rank !== a.handRank.rank) {
+                    return b.handRank.rank - a.handRank.rank;
+                }
+                for (let i = 0; i < Math.min(a.handRank.highCards.length, b.handRank.highCards.length); i++) {
+                    if (b.handRank.highCards[i] !== a.handRank.highCards[i]) {
+                        return b.handRank.highCards[i] - a.handRank.highCards[i];
+                    }
+                }
+                return 0; // True tie
+            });
+            
+            winningPlayerIndices = []; // Reset for new hand
+            if (handRankings.length > 0) {
+                const topRank = handRankings[0].handRank.rank;
+                const topHighCards = handRankings[0].handRank.highCards;
+                
+                // Find all players with the exact same best hand
+                for (let i = 0; i < handRankings.length; i++) {
+                    const current = handRankings[i];
+                    if (current.handRank.rank === topRank && 
+                        current.handRank.highCards.every((card, idx) => card === topHighCards[idx])) {
+                        winningPlayerIndices.push(current.index);
+                    } else {
+                        break; 
+                    }
+                }
+            }
+            
+            winningHandTypes.push(handRankings[0] ? handRankings[0].handRank.name : "No Hand");
+            
+            for (let i = 0; i < 3; i++) {
+                const handElement = document.getElementById(`player${i+1}-hand`);
+                handElement.textContent = handRankings.find(h => h.index === i).handRank.name;
+                handElement.classList.add('hidden');
+            }
+            
+            const resultElement = document.getElementById('result');
+            resultElement.classList.add('hidden');
+            
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+
+            const playerButtons = document.querySelectorAll('.grid .btn');
+            playerButtons.forEach(btn => {
+                btn.disabled = false;
+            });
+            
+            totalQuestions++;
+            handStartTime = Date.now();
+            
+            startCountdownTimer();
+        }
+        
+        function startCountdownTimer() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (timeoutId) clearTimeout(timeoutId);
+
+            const timerElement = document.querySelector('.timer');
+            let timeRemaining = timeLimit;
+            
+            timerElement.textContent = formatTime(timeRemaining);
+            timerElement.classList.remove('time-warning');
+            
+            countdownTimer = setInterval(() => {
+                timeRemaining--;
+                timerElement.textContent = formatTime(timeRemaining);
+                
+                if (timeRemaining <= 5 && timeRemaining > 0) {
+                    timerElement.classList.add('time-warning');
+                } else {
+                    timerElement.classList.remove('time-warning');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownTimer);
+                    timeoutAnswer();
+                }
+            }, 1000);
+            
+            timeoutId = setTimeout(() => {
+                if (gameActive && document.querySelectorAll('.grid .btn:not([disabled])').length > 0) {
+                    timeoutAnswer();
+                }
+            }, timeLimit * 1000 + 100);
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+        
+        function timeoutAnswer() {
+            if (document.querySelectorAll('.grid .btn:not([disabled])').length === 0) {
+                return;
+            }
+
+            clearInterval(countdownTimer);
+            clearTimeout(timeoutId);
+
+            const timeTaken = (Date.now() - handStartTime) / 1000;
+            handTimes.push(timeTaken);
+            handResults.push(false);
+            
+            const resultElement = document.getElementById('result');
+            let message = "";
+            if (winningPlayerIndices.length > 1) {
+                 message = `Time's up! It's a Split Pot! The best hand (${winningHandTypes[winningHandTypes.length - 1]}) is shared by Players ${winningPlayerIndices.map(idx => idx + 1).join(' and ')}.`;
+                 message += ` You needed to select one of these tied players.`;
+            } else {
+                 message = `Time's up! Player ${winningPlayerIndices[0] + 1} has the winning hand (${winningHandTypes[winningHandTypes.length - 1]}).`;
+            }
+            resultElement.textContent = message;
+            resultElement.className = "p-4 rounded-lg mb-6 text-center bg-orange-100 text-orange-800 font-bold text-xl";
+            resultElement.classList.remove('hidden');
+            
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`player${i+1}-hand`).classList.remove('hidden');
+            }
+            
+            winningPlayerIndices.forEach(idx => {
+                const winningContainer = document.getElementById(`player${idx + 1}-container`);
+                winningContainer.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('highlight');
+                });
+            });
+            
+            const playerButtons = document.querySelectorAll('.grid .btn');
+            playerButtons.forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            updateProgress();
+            updateHistory();
+        }
+        
+        function resetDeck() {
+            deck = [];
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ suit, value });
+                }
+            }
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+        
+        function dealCards(count) {
+            return deck.splice(0, count);
+        }
+        
+        function displayCard(elementId, card) {
+            const cardElement = document.getElementById(elementId);
+            const colorClass = suitColors[card.suit];
+            
+            cardElement.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full ${colorClass}">
+                    <div class="card-value">${card.value}</div>
+                    <div class="card-suit">${card.suit}</div>
+                </div>
+            `;
+        }
+
+        // --- Texas Hold'em Hand Evaluation Logic ---
+        function getCombinations(arr, k) {
+            const result = [];
+            function backtrack(startIndex, currentCombination) {
+                if (currentCombination.length === k) {
+                    result.push([...currentCombination]);
+                    return;
+                }
+                for (let i = startIndex; i < arr.length; i++) {
+                    currentCombination.push(arr[i]);
+                    backtrack(i + 1, currentCombination);
+                    currentCombination.pop();
+                }
+            }
+            backtrack(0, []);
+            return result;
+        }
+
+        function evaluateFiveCardHand(fiveCards) {
+            const sortedCards = fiveCards.sort((a, b) => cardRankMap[b.value] - cardRankMap[a.value]);
+
+            const valueCounts = {};
+            const suitCounts = {};
+            const numericValues = [];
+
+            for (const card of sortedCards) {
+                const numericValue = cardRankMap[card.value];
+                valueCounts[numericValue] = (valueCounts[numericValue] || 0) + 1;
+                suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
+                numericValues.push(numericValue);
+            }
+
+            let isFlush = false;
+            let flushSuit = '';
+            for (const suit in suitCounts) {
+                if (suitCounts[suit] >= 5) {
+                    isFlush = true;
+                    flushSuit = suit;
+                    break;
+                }
+            }
+
+            let isStraight = false;
+            let straightHighCard = 0;
+            const uniqueNumericValues = Array.from(new Set(numericValues)).sort((a, b) => a - b);
+
+            if (uniqueNumericValues.includes(14) && uniqueNumericValues.includes(2) &&
+                uniqueNumericValues.includes(3) && uniqueNumericValues.includes(4) &&
+                uniqueNumericValues.includes(5)) {
+                isStraight = true;
+                straightHighCard = 5;
+            } else {
+                for (let i = 0; i <= uniqueNumericValues.length - 5; i++) {
+                    if (uniqueNumericValues[i + 4] - uniqueNumericValues[i] === 4) {
+                        isStraight = true;
+                        straightHighCard = uniqueNumericValues[i + 4];
+                        break;
+                    }
+                }
+            }
+
+            const getValuesByCount = (count) => Object.keys(valueCounts)
+                .map(Number)
+                .filter(val => valueCounts[val] === count)
+                .sort((a, b) => b - a);
+
+            const quads = getValuesByCount(4);
+            const trips = getValuesByCount(3);
+            const pairs = getValuesByCount(2);
+            const singles = getValuesByCount(1);
+
+            if (isStraight && isFlush) {
+                if (straightHighCard === 14 && 
+                    fiveCards.filter(c => c.suit === flushSuit && ['10', 'J', 'Q', 'K', 'A'].includes(c.value)).length === 5) {
+                     return { rank: 9, name: "Royal Flush", highCards: [14] };
+                }
+                return { rank: 8, name: "Straight Flush", highCards: [straightHighCard] };
+            } else if (quads.length > 0) {
+                return { rank: 7, name: "Four of a Kind", highCards: [quads[0], ...singles.slice(0,1)] }; 
+            } else if (trips.length > 0 && pairs.length > 0) {
+                return { rank: 6, name: "Full House", highCards: [trips[0], pairs[0]] };
+            } else if (isFlush) {
+                const flushCardsNumericValues = sortedCards.filter(c => c.suit === flushSuit).map(c => cardRankMap[c.value]);
+                return { rank: 5, name: "Flush", highCards: flushCardsNumericValues.slice(0, 5) };
+            } else if (isStraight) {
+                return { rank: 4, name: "Straight", highCards: [straightHighCard] };
+            } else if (trips.length > 0) {
+                return { rank: 3, name: "Three of a Kind", highCards: [trips[0], ...singles.slice(0, 2)] };
+            } else if (pairs.length >= 2) {
+                return { rank: 2, name: "Two Pair", highCards: [pairs[0], pairs[1], ...singles.slice(0, 1)] };
+            } else if (pairs.length === 1) {
+                return { rank: 1, name: "One Pair", highCards: [pairs[0], ...singles.slice(0, 3)] };
+            } else {
+                return { rank: 0, name: "High Card", highCards: numericValues.slice(0, 5) };
+            }
+        }
+
+        function evaluateTexasHoldemHand(holeCards, communityCards) {
+            const allSevenCards = [...holeCards, ...communityCards];
+            const allFiveCardCombinations = getCombinations(allSevenCards, 5);
+
+            let bestHand = { rank: -1, name: "No Hand", highCards: [] };
+
+            for (const fiveCardCombo of allFiveCardCombinations) {
+                const currentHandRank = evaluateFiveCardHand(fiveCardCombo);
+
+                if (currentHandRank.rank > bestHand.rank) {
+                    bestHand = currentHandRank;
+                } else if (currentHandRank.rank === bestHand.rank) {
+                    let currentHandIsBetter = false;
+                    for (let i = 0; i < currentHandRank.highCards.length; i++) {
+                        if (currentHandRank.highCards[i] > bestHand.highCards[i]) {
+                            currentHandIsBetter = true;
+                            break;
+                        } else if (currentHandRank.highCards[i] < bestHand.highCards[i]) {
+                            currentHandIsBetter = false;
+                            break;
+                        }
+                    }
+                    if (currentHandIsBetter) {
+                        bestHand = currentHandRank;
+                    }
+                }
+            }
+            return bestHand;
+        }
+        
+        function selectWinner(playerIndex) {
+            clearInterval(countdownTimer);
+            clearTimeout(timeoutId);
+            
+            const timeTaken = (Date.now() - handStartTime) / 1000;
+            handTimes.push(timeTaken);
+            
+            const playerButtons = document.querySelectorAll('.grid .btn');
+            playerButtons.forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`player${i+1}-hand`).classList.remove('hidden');
+            }
+            
+            const resultElement = document.getElementById('result');
+            resultElement.classList.remove('hidden');
+            
+            let isCorrect = winningPlayerIndices.includes(playerIndex);
+
+            if (isCorrect) {
+                if (winningPlayerIndices.length > 1) {
+                    resultElement.textContent = `Correct! It's a Split Pot! The best hand (${winningHandTypes[winningHandTypes.length - 1]}) is shared by Players ${winningPlayerIndices.map(idx => idx + 1).join(' and ')}. You selected Player ${playerIndex + 1}.`;
+                } else {
+                    resultElement.textContent = "Correct! Well done!";
+                }
+                resultElement.className = "p-4 rounded-lg mb-6 text-center bg-green-100 text-green-800 font-bold text-xl";
+                score++;
+                handResults.push(true);
+            } else {
+                let message = `Incorrect.`;
+                if (winningPlayerIndices.length > 1) {
+                    message += ` It's a Split Pot! The best hand (${winningHandTypes[winningHandTypes.length - 1]}) is shared by Players ${winningPlayerIndices.map(idx => idx + 1).join(' and ')}. You needed to select one of these tied players.`;
+                } else {
+                    message += ` Player ${winningPlayerIndices[0] + 1} has the winning hand (${winningHandTypes[winningHandTypes.length - 1]}).`;
+                }
+                resultElement.textContent = message;
+                resultElement.className = "p-4 rounded-lg mb-6 text-center bg-red-100 text-red-800 font-bold text-xl";
+                handResults.push(false);
+            }
+            
+            winningPlayerIndices.forEach(idx => {
+                const winningContainer = document.getElementById(`player${idx + 1}-container`);
+                winningContainer.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('highlight');
+                });
+            });
+            
+            updateScore();
+            updateProgress();
+            updateHistory();
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('total').textContent = totalQuestions;
+        }
+        
+        function updateProgress() {
+            const progressPercent = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
+            document.querySelector('.progress').style.width = `${progressPercent}%`;
+        }
+        
+        function updateHistory() {
+            const tableBody = document.getElementById('history-table-body');
+            const index = handResults.length - 1;
+            
+            if (index >= 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-2 px-4 border-b border-gray-200">${index + 1}</td>
+                    <td class="py-2 px-4 border-b border-gray-200">
+                        <span class="px-2 py-1 rounded-full text-xs ${handResults[index] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${handResults[index] ? 'Correct' : 'Incorrect'}
+                        </span>
+                    </td>
+                    <td class="py-2 px-4 border-b border-gray-200">${handTimes[index].toFixed(1)}</td>
+                    <td class="py-2 px-4 border-b border-gray-200">${winningHandTypes[index]}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+        
+        function nextHand() {
+            if (totalQuestions >= 10) { 
+                endGame();
+            } else {
+                dealNewHand();
+            }
+        }
+        
+        function endGame() {
+            gameActive = false;
+            
+            if (timer) clearInterval(timer);
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (timeoutId) clearTimeout(timeoutId);
+            
+            const accuracy = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
+            const avgTime = handTimes.length > 0 ? handTimes.reduce((a, b) => a + b, 0) / handTimes.length : 0;
+            
+            let rating = "Beginner";
+            if (accuracy >= 90) {
+                if (avgTime < timeLimit * 0.5) {
+                    rating = "Expert";
+                } else if (avgTime < timeLimit * 0.7) {
+                    rating = "Advanced";
+                } else {
+                    rating = "Proficient";
+                }
+            } else if (accuracy >= 70) {
+                if (avgTime < timeLimit * 0.6) {
+                    rating = "Proficient";
+                } else {
+                    rating = "Intermediate";
+                }
+            } else if (accuracy >= 50) {
+                rating = "Intermediate";
+            }
+            
+            document.getElementById('accuracy-stat').textContent = `${accuracy.toFixed(1)}%`;
+            document.getElementById('avg-time-stat').textContent = `${avgTime.toFixed(1)}s`;
+            document.getElementById('rating-stat').textContent = rating;
+            
+            document.getElementById('game-stats').classList.remove('hidden');
+            
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.remove('hidden');
+            document.getElementById('restart-btn').textContent = "Play Again";
+
+            const msFormLink = "https://forms.office.com/r/dbACtrhL5U"; 
+            const manualDataInstruction = `
+                <div class="manual-data-instruction mt-8 p-4 bg-blue-100 text-blue-800 rounded-lg text-center font-semibold">
+                    <p class="text-lg mb-2">Please record your game results!</p>
+                    <p class="mb-4">Since this game runs directly from OneDrive, your scores need to be manually submitted.</p>
+                    <a href="${msFormLink}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg inline-flex items-center justify-center transition duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                        Open Submission Form
+                    </a>
+                    <p class="mt-4 text-sm text-gray-700">Please enter the following data:</p>
+                    <ul class="list-disc list-inside mt-2 text-left mx-auto max-w-sm">
+                        <li><strong>Player Name:</strong> ${playerName || 'N/A'}</li>
+                        <li><strong>Player ID:</strong> ${playerId || 'N/A'}</li>
+                        <li><strong>Difficulty:</strong> ${timeLimit} seconds (${document.getElementById('level-indicator').textContent})</li>
+                        <li><strong>Final Score:</strong> ${score} / ${totalQuestions}</li>
+                        <li><strong>Accuracy:</strong> ${accuracy.toFixed(1)}%</li>
+                        <li><strong>Average Time per Hand:</strong> ${avgTime.toFixed(1)}s</li>
+                        <li><strong>Performance Rating:</strong> ${rating}</li>
+                    </ul>
+                    <p class="mt-4 text-sm text-gray-700">You can also copy the "Session History" table data if requested.</p>
+                </div>
+            `;
+            document.getElementById('game-stats').insertAdjacentHTML('afterend', manualDataInstruction);
+        }
+        
+        function startTimer() {
+            startTime = Date.now();
+            if (timer) clearInterval(timer);
+            
+            timer = setInterval(() => {
+                if (!gameActive) return;
+                
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+                const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+                document.querySelector('.timer').textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+        
+        window.onload = initGame;
+    </script>
+</body>
+</html>

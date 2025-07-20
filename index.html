@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Hand Ranking Flashcards</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="icon" href="https://www.microsoft.com/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="style.css">
+
+    <meta name="description" content="A fun and interactive game to practice poker hand rankings, compatible with OneDrive and Edge browser on desktop and mobile.">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a472a"> <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a472a, #2d6a4f);
+            min-height: 100vh;
+            /* overflow-x: hidden; is removed to ensure content is never cut off */
+        }
+        
+        /* Card sizing adjusted for better mobile fitting without being too small */
+        .card {
+            width: 80px; /* Original fixed width */
+            height: 120px;
+            perspective: 1000px;
+            display: inline-block;
+            margin: 0 4px; /* Maintain small margin */
+            flex-shrink: 0; /* Prevent cards from shrinking too much */
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-front {
+            background-color: #f0f0f0;
+            color: black;
+            transform: rotateY(180deg);
+            font-size: 0.9em; /* Adjust font size for content within card */
+            padding: 5px; /* Add some padding */
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            background-image: url("data:image/svg+xml,%3Csvg width='70' height='100' viewBox='0 0 70 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M35 50C35 41.716 41.716 35 50 35C58.284 35 65 41.716 65 50C65 58.284 58.284 65 50 65C41.716 65 35 58.284 35 50Z' fill='%23ffffff20'/%3E%3Cpath d='M5 50C5 41.716 11.716 35 20 35C28.284 35 35 41.716 35 50C35 58.284 28.284 65 20 65C11.716 65 5 58.284 5 50Z' fill='%23ffffff20'/%3E%3Cpath d='M20 5C28.284 5 35 11.716 35 20C35 28.284 28.284 35 20 35C11.716 35 5 28.284 5 20C5 11.716 11.716 5 20 5Z' fill='%23ffffff20'/%3E%3Cpath d='M50 5C58.284 5 65 11.716 65 20C65 28.284 58.284 35 50 35C41.716 35 35 28.284 35 20C35 11.716 41.716 5 50 5Z' fill='%23ffffff20'/%3E%3Cpath d='M20 65C28.284 65 35 71.716 35 80C35 88.284 28.284 95 20 95C11.716 95 5 88.284 5 80C5 71.716 11.716 65 20 65Z' fill='%23ffffff20'/%3E%3Cpath d='M50 65C58.284 65 65 71.716 65 80C65 88.284 58.284 95 50 95C41.716 95 35 88.284 35 80C35 71.716 41.716 65 50 65Z' fill='%23ffffff20'/%3E%3C/svg%3E");
+        }
+        
+        .flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .highlight {
+            box-shadow: 0 0 15px 5px #ffd700;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 1); }
+            100% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            transition: width 0.5s ease;
+        }
+        
+        .timer {
+            font-family: 'Poppins', monospace;
+            font-weight: 600;
+        }
+        
+        .card-suit {
+            font-size: 32px;
+            line-height: 1;
+        }
+        
+        .card-value {
+            font-size: 36px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .red {
+            color: #dc2626;
+        }
+        
+        .black {
+            color: #000000;
+        }
+        
+        .time-warning {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Responsive adjustments for overall layout */
+        @media (max-width: 768px) {
+            .card {
+                width: 70px; /* Slightly smaller cards on smaller screens */
+                height: 105px;
+                margin: 0 2px;
+            }
+            .card-suit {
+                font-size: 28px;
+            }
+            .card-value {
+                font-size: 32px;
+            }
+            .max-w-4xl {
+                max-width: 100%; /* Allow full width on small screens */
+                border-radius: 0; /* Remove rounded corners on full width */
+            }
+            .p-4 {
+                padding: 1rem; /* Adjust overall padding */
+            }
+            .flex-wrap { /* Ensure flex containers wrap */
+                flex-wrap: wrap;
+            }
+            .grid-cols-1 { /* Force 1 column on small screens for player sections */
+                grid-template-columns: 1fr;
+            }
+            .md\:grid-cols-3 { /* Override Tailwind's md: behavior for smaller screens */
+                grid-template-columns: 1fr;
+            }
+            .space-x-4 > *:not([hidden]) ~ *:not([hidden]) {
+                margin-left: 1rem; /* Adjust spacing for buttons/elements */
+            }
+        }
+        @media (max-width: 480px) {
+            .card {
+                width: 60px; /* Even smaller cards for very small screens */
+                height: 90px;
+                margin: 0 1px;
+            }
+            .card-suit {
+                font-size: 24px;
+            }
+            .card-value {
+                font-size: 28px;
+            }
+            .text-3xl {
+                font-size: 2rem; /* Adjust header size */
+            }
+            .text-xl {
+                font-size: 1.25rem; /* Adjust section title size */
+            }
+            .modal-content {
+                padding: 1.5rem;
+            }
+            .p-6 {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div id="registration-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Player Registration</h2>
+            <form id="registration-form" class="space-y-4">
+                <div>
+                    <label for="player-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="player-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="player-id" class="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                    <input type="text" id="player-id" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="difficulty-level" class="block text-sm font-medium text-gray-700 mb-1">Difficulty Level</label>
+                    <select id="difficulty-level" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="15">Professional (15 seconds)</option>
+                        <option value="10">Excellent (10 seconds)</option>
+                        <option value="20">Good (20 seconds)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    Start Game
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Poker Hand Ranking</h1>
+                    <div class="mt-1 text-gray-600" id="player-info">Not registered</div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+                    <div class="text-lg font-semibold text-gray-700">Score: <span id="score">0</span>/<span id="total">0</span></div>
+                    <div class="timer px-4 py-2 bg-gray-100 rounded-lg text-xl font-mono">00:00</div>
+                    <div id="level-indicator" class="level-badge bg-blue-100 text-blue-800">Good</div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="bg-green-100 p-4 rounded-lg mb-6">
+                <h2 class="text-xl font-semibold text-green-800 mb-2 text-center">Community Cards</h2>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <div class="space-y-2 flex-grow">
+                        <div class="text-sm font-medium text-green-700 text-center">Flop</div>
+                        <div class="flex flex-wrap justify-center gap-1" id="flop-container">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop1"></div>
+                                </div>
+                            </div>
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop2"></div>
+                                </div>
+                            </div>
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="flop3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 flex-grow">
+                        <div class="text-sm font-medium text-green-700 text-center">Turn</div>
+                        <div class="flex flex-wrap justify-center gap-1" id="turn-container">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="turn"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 flex-grow">
+                        <div class="text-sm font-medium text-green-700 text-center">River</div>
+                        <div class="flex flex-wrap justify-center gap-1" id="river-container">
+                            <div class="card flipped">
+                                <div class="card-inner">
+                                    <div class="card-back"></div>
+                                    <div class="card-front" id="river"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 1</h3>
+                    <div class="flex flex-wrap justify-center gap-1" id="player1-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player1-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player1-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(0)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player1-hand"></div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 2</h3>
+                    <div class="flex flex-wrap justify-center gap-1" id="player2-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player2-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player2-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(1)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player2-hand"></div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2 text-center">Player 3</h3>
+                    <div class="flex flex-wrap justify-center gap-1" id="player3-container">
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player3-card1"></div>
+                            </div>
+                        </div>
+                        <div class="card flipped">
+                            <div class="card-inner">
+                                <div class="card-back"></div>
+                                <div class="card-front" id="player3-card2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="selectWinner(2)" disabled>
+                            Select Winner
+                        </button>
+                    </div>
+                    <div class="mt-2 text-center hidden" id="player3-hand"></div>
+                </div>
+            </div>
+            
+            <div id="result" class="hidden p-4 rounded-lg mb-6 text-center"></div>
+            
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="next-btn" class="btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg hidden w-full sm:w-auto">
+                    Next Hand
+                </button>
+                <button id="restart-btn" class="btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg w-full sm:w-auto">
+                    Register & Start
+                </button>
+            </div>
+            
+            <div id="game-stats" class="mt-8 p-4 bg-gray-50 rounded-lg hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Game Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Accuracy</div>
+                        <div class="text-2xl font-bold" id="accuracy-stat">0%</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Average Time</div>
+                        <div class="text-2xl font-bold" id="avg-time-stat">0.0s</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="text-sm text-gray-500">Performance Rating</div>
+                        <div class="text-2xl font-bold" id="rating-stat">-</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h4 class="font-medium text-gray-700 mb-2">Session History</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hand</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Result</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Time (s)</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Winning Hand</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

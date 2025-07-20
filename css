@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1a472a, #2d6a4f);
+    min-height: 100vh;
+    /* overflow-x: hidden; is removed to ensure content is never cut off */
+}
+
+/* Card sizing adjusted for better mobile fitting without being too small */
+.card {
+    width: 80px; /* Original fixed width */
+    height: 120px;
+    perspective: 1000px;
+    display: inline-block;
+    margin: 0 4px; /* Maintain small margin */
+    flex-shrink: 0; /* Prevent cards from shrinking too much */
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 8px;
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-front {
+    background-color: #f0f0f0;
+    color: black;
+    transform: rotateY(180deg);
+    font-size: 0.9em; /* Adjust font size for content within card */
+    padding: 5px; /* Add some padding */
+    box-sizing: border-box; /* Include padding in width/height */
+}
+
+.card-back {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    background-image: url("data:image/svg+xml,%3Csvg width='70' height='100' viewBox='0 0 70 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M35 50C35 41.716 41.716 35 50 35C58.284 35 65 41.716 65 50C65 58.284 58.284 65 50 65C41.716 65 35 58.284 35 50Z' fill='%23ffffff20'/%3E%3Cpath d='M5 50C5 41.716 11.716 35 20 35C28.284 35 35 41.716 35 50C35 58.284 28.284 65 20 65C11.716 65 5 58.284 5 50Z' fill='%23ffffff20'/%3E%3Cpath d='M20 5C28.284 5 35 11.716 35 20C35 28.284 28.284 35 20 35C11.716 35 5 28.284 5 20C5 11.716 11.716 5 20 5Z' fill='%23ffffff20'/%3E%3Cpath d='M50 5C58.284 5 65 11.716 65 20C65 28.284 58.284 35 50 35C41.716 35 35 28.284 35 20C35 11.716 41.716 5 50 5Z' fill='%23ffffff20'/%3E%3Cpath d='M20 65C28.284 65 35 71.716 35 80C35 88.284 28.284 95 20 95C11.716 95 5 88.284 5 80C5 71.716 11.716 65 20 65Z' fill='%23ffffff20'/%3E%3Cpath d='M50 65C58.284 65 65 71.716 65 80C65 88.284 58.284 95 50 95C41.716 95 35 88.284 35 80C35 71.716 41.716 65 50 65Z' fill='%23ffffff20'/%3E%3C/svg%3E");
+}
+
+.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.highlight {
+    box-shadow: 0 0 15px 5px #ffd700;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+    50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 1); }
+    100% { box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7); }
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background: linear-gradient(90deg, #4ade80, #22c55e);
+    transition: width 0.5s ease;
+}
+
+.timer {
+    font-family: 'Poppins', monospace;
+    font-weight: 600;
+}
+
+.card-suit {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.card-value {
+    font-size: 36px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.red {
+    color: #dc2626;
+}
+
+.black {
+    color: #000000;
+}
+
+.time-warning {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.level-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+}
+
+/* Responsive adjustments for overall layout */
+@media (max-width: 768px) {
+    .card {
+        width: 70px; /* Slightly smaller cards on smaller screens */
+        height: 105px;
+        margin: 0 2px;
+    }
+    .card-suit {
+        font-size: 28px;
+    }
+    .card-value {
+        font-size: 32px;
+    }
+    .max-w-4xl {
+        max-width: 100%; /* Allow full width on small screens */
+        border-radius: 0; /* Remove rounded corners on full width */
+    }
+    .p-4 {
+        padding: 1rem; /* Adjust overall padding */
+    }
+    .flex-wrap { /* Ensure flex containers wrap */
+        flex-wrap: wrap;
+    }
+    .grid-cols-1 { /* Force 1 column on small screens for player sections */
+        grid-template-columns: 1fr;
+    }
+    .md\:grid-cols-3 { /* Override Tailwind's md: behavior for smaller screens */
+        grid-template-columns: 1fr;
+    }
+    .space-x-4 > *:not([hidden]) ~ *:not([hidden]) {
+        margin-left: 1rem; /* Adjust spacing for buttons/elements */
+    }
+}
+@media (max-width: 480px) {
+    .card {
+        width: 60px; /* Even smaller cards for very small screens */
+        height: 90px;
+        margin: 0 1px;
+    }
+    .card-suit {
+        font-size: 24px;
+    }
+    .card-value {
+        font-size: 28px;
+    }
+    .text-3xl {
+        font-size: 2rem; /* Adjust header size */
+    }
+    .text-xl {
+        font-size: 1.25rem; /* Adjust section title size */
+    }
+    .modal-content {
+        padding: 1.5rem;
+    }
+    .p-6 {
+        padding: 1rem;
+    }
+}
